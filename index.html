@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Halftone Pro</title>
+<link rel="stylesheet" href="./css/style.css" />
+</head>
+<body>
+<div id="app">
+
+  <!-- LEFT: CONTROLS -->
+  <div id="col-left">
+
+    <!-- HEADER -->
+    <header id="hdr">
+      <div id="hdr-title">
+        <span class="logo">Halftone Pro</span>
+        <span class="by">by <b>Petra-dot</b></span>
+      </div>
+      <div id="hdr-ver">v4.0</div>
+    </header>
+
+    <!-- TAB BAR -->
+    <nav id="tabs">
+      <button class="tab active" data-tab="0">Spots</button>
+      <button class="tab" data-tab="1">Lines</button>
+      <button class="tab" data-tab="2">Stipple</button>
+      <button class="tab" data-tab="3">Image</button>
+    </nav>
+
+    <!-- SCROLLABLE CONTROLS -->
+    <main id="controls">
+
+      <!-- TAB 0: SPOTS -->
+      <div class="tab-panel" data-panel="0">
+
+        <div class="section">
+          <div class="sec-head">Shape</div>
+          <div class="sec-body">
+            <div class="radio-grid" id="spots-shape">
+              <label><input type="radio" name="spots-shape" value="circle" checked> Circle</label>
+              <label><input type="radio" name="spots-shape" value="square"> Square</label>
+              <label><input type="radio" name="spots-shape" value="triangle"> Triangle</label>
+              <label><input type="radio" name="spots-shape" value="hexagon"> Hexagon</label>
+              <label><input type="radio" name="spots-shape" value="diamond"> Diamond</label>
+              <label><input type="radio" name="spots-shape" value="custom"> Custom</label>
+            </div>
+            <div class="btn-group">
+              <button id="cap-shape" class="btn-mini">Use Selected Path as Dot</button>
+              <button id="cap-clear" class="btn-mini ghost">Clear</button>
+            </div>
+            <div id="sym-name" class="sym-name">No custom symbol captured</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="sec-head">Grid &amp; Spacing</div>
+          <div class="sec-body">
+            <label class="slider-row"><span>Cell size</span><input type="range" min="4" max="80" value="18" data-key="cell"><span class="val" data-val="cell">18</span></label>
+            <label class="slider-row"><span>Gap %</span><input type="range" min="0" max="80" value="15" data-key="gap"><span class="val" data-val="gap">15</span></label>
+            <label class="slider-row"><span>Min scale %</span><input type="range" min="0" max="100" value="20" data-key="minScale"><span class="val" data-val="minScale">20</span></label>
+            <label class="slider-row"><span>Max scale %</span><input type="range" min="0" max="100" value="100" data-key="maxScale"><span class="val" data-val="maxScale">100</span></label>
+            <label class="slider-row"><span>Angle</span><input type="range" min="0" max="89" value="45" data-key="angle"><span class="val" data-val="angle">45</span><span class="suffix">&deg;</span></label>
+            <label class="check-row"><input type="checkbox" data-key="randSize"> Random dot size</label>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="sec-head">Dot Size Source</div>
+          <div class="sec-body">
+            <div class="radio-grid" id="spots-src">
+              <label><input type="radio" name="spots-src" value="uniform" checked> Uniform</label>
+              <label><input type="radio" name="spots-src" value="diagonal"> Diagonal</label>
+              <label><input type="radio" name="spots-src" value="linear"> Linear</label>
+              <label><input type="radio" name="spots-src" value="radial"> Radial</label>
+            </div>
+            <label class="check-row"><input type="checkbox" data-key="invert"> Invert</label>
+            <label class="slider-row"><span>Gamma</span><input type="range" min="0.3" max="3" step="0.05" value="1" data-key="gamma"><span class="val" data-val="gamma">1.00</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 1: LINES -->
+      <div class="tab-panel hidden" data-panel="1">
+
+        <div class="section">
+          <div class="sec-head">Line Mode</div>
+          <div class="sec-body">
+            <div class="radio-grid" id="line-mode">
+              <label><input type="radio" name="line-mode" value="straight" checked> Straight</label>
+              <label><input type="radio" name="line-mode" value="wavy"> Wavy</label>
+              <label><input type="radio" name="line-mode" value="cross"> Cross-hatch</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="sec-head">Grid</div>
+          <div class="sec-body">
+            <label class="slider-row"><span>Spacing</span><input type="range" min="2" max="80" value="8" data-key="lineSpacing"><span class="val" data-val="lineSpacing">8</span></label>
+            <label class="slider-row"><span>Angle</span><input type="range" min="0" max="89" value="45" data-key="lineAngle"><span class="val" data-val="lineAngle">45</span><span class="suffix">&deg;</span></label>
+            <label class="slider-row"><span>Min weight</span><input type="range" min="0.2" max="20" step="0.1" value="0.5" data-key="lineW"><span class="val" data-val="lineW">0.50</span></label>
+            <label class="slider-row"><span>Max weight</span><input type="range" min="0.2" max="20" step="0.1" value="3" data-key="lineWMax"><span class="val" data-val="lineWMax">3.00</span></label>
+          </div>
+        </div>
+
+        <div class="section" id="wavy-section">
+          <div class="sec-head">Wavy / Cross-hatch</div>
+          <div class="sec-body">
+            <label class="slider-row"><span>Frequency</span><input type="range" min="1" max="12" value="4" data-key="wavyFreq"><span class="val" data-val="wavyFreq">4</span></label>
+            <label class="slider-row"><span>Amplitude</span><input type="range" min="1" max="100" value="18" data-key="wavyAmp"><span class="val" data-val="wavyAmp">18</span></label>
+            <label class="slider-row"><span>Passes</span><input type="range" min="2" max="3" value="2" data-key="wavyPasses"><span class="val" data-val="wavyPasses">2</span></label>
+            <label class="slider-row"><span>Pass angle</span><input type="range" min="10" max="90" value="30" data-key="passAngle"><span class="val" data-val="passAngle">30</span><span class="suffix">&deg;</span></label>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="sec-head">Darkness Source</div>
+          <div class="sec-body">
+            <div class="radio-grid" id="line-src">
+              <label><input type="radio" name="line-src" value="uniform" checked> Uniform</label>
+              <label><input type="radio" name="line-src" value="diagonal"> Diagonal</label>
+              <label><input type="radio" name="line-src" value="linear"> Linear</label>
+              <label><input type="radio" name="line-src" value="linear-rev"> Linear Rev</label>
+              <label><input type="radio" name="line-src" value="radial"> Radial</label>
+            </div>
+            <label class="check-row"><input type="checkbox" data-key="invert"> Invert</label>
+            <label class="slider-row"><span>Gamma</span><input type="range" min="0.3" max="3" step="0.05" value="1" data-key="gamma"><span class="val" data-val="gamma">1.00</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: STIPPLE -->
+      <div class="tab-panel hidden" data-panel="2">
+
+        <div class="section">
+          <div class="sec-head">Grid &amp; Scatter</div>
+          <div class="sec-body">
+            <label class="slider-row"><span>Cell size</span><input type="range" min="4" max="80" value="12" data-key="cell"><span class="val" data-val="cell">12</span></label>
+            <label class="slider-row"><span>Gap %</span><input type="range" min="0" max="80" value="10" data-key="gap"><span class="val" data-val="gap">10</span></label>
+            <label class="slider-row"><span>Min scale %</span><input type="range" min="0" max="100" value="5" data-key="minScale"><span class="val" data-val="minScale">5</span></label>
+            <label class="slider-row"><span>Max scale %</span><input type="range" min="0" max="100" value="100" data-key="maxScale"><span class="val" data-val="maxScale">100</span></label>
+            <label class="slider-row"><span>Angle</span><input type="range" min="0" max="89" value="0" data-key="angle"><span class="val" data-val="angle">0</span><span class="suffix">&deg;</span></label>
+            <label class="slider-row"><span>Scatter %</span><input type="range" min="0" max="100" value="65" data-key="scatter"><span class="val" data-val="scatter">65</span></label>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="sec-head">Darkness Source</div>
+          <div class="sec-body">
+            <div class="radio-grid" id="stipple-src">
+              <label><input type="radio" name="stipple-src" value="uniform" checked> Uniform</label>
+              <label><input type="radio" name="stipple-src" value="diagonal"> Diagonal</label>
+              <label><input type="radio" name="stipple-src" value="linear"> Linear</label>
+              <label><input type="radio" name="stipple-src" value="radial"> Radial</label>
+            </div>
+            <label class="check-row"><input type="checkbox" data-key="invert"> Invert</label>
+            <label class="slider-row"><span>Gamma</span><input type="range" min="0.3" max="3" step="0.05" value="1" data-key="gamma"><span class="val" data-val="gamma">1.00</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: IMAGE -->
+      <div class="tab-panel hidden" data-panel="3">
+
+        <div class="section">
+          <div class="sec-head">Import</div>
+          <div class="sec-body">
+            <div id="drop-zone" class="drop-zone">
+              <div class="drop-text">Drop image here<br>or click to browse</div>
+              <input type="file" id="img-input" accept="image/*" hidden>
+            </div>
+            <div id="img-name" class="img-name">No image loaded</div>
+            <button id="img-clear" class="btn-mini ghost sm">Clear Image</button>
+            <label class="check-row"><input type="checkbox" data-key="placeImage"> Place source image on artboard</label>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="sec-head">Dot Settings</div>
+          <div class="sec-body">
+            <div class="radio-grid" id="img-shape">
+              <label><input type="radio" name="img-shape" value="circle" checked> Circle</label>
+              <label><input type="radio" name="img-shape" value="square"> Square</label>
+              <label><input type="radio" name="img-shape" value="hexagon"> Hexagon</label>
+              <label><input type="radio" name="img-shape" value="diamond"> Diamond</label>
+            </div>
+            <label class="slider-row"><span>Cell size</span><input type="range" min="4" max="80" value="14" data-key="cell"><span class="val" data-val="cell">14</span></label>
+            <label class="slider-row"><span>Gap %</span><input type="range" min="0" max="80" value="10" data-key="gap"><span class="val" data-val="gap">10</span></label>
+            <label class="slider-row"><span>Min scale %</span><input type="range" min="0" max="100" value="0" data-key="minScale"><span class="val" data-val="minScale">0</span></label>
+            <label class="slider-row"><span>Max scale %</span><input type="range" min="0" max="100" value="100" data-key="maxScale"><span class="val" data-val="maxScale">100</span></label>
+            <label class="slider-row"><span>Angle</span><input type="range" min="0" max="89" value="0" data-key="angle"><span class="val" data-val="angle">0</span><span class="suffix">&deg;</span></label>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="sec-head">Brightness</div>
+          <div class="sec-body">
+            <label class="check-row"><input type="checkbox" data-key="invert"> Invert</label>
+            <label class="slider-row"><span>Gamma</span><input type="range" min="0.3" max="3" step="0.05" value="1" data-key="gamma"><span class="val" data-val="gamma">1.00</span></label>
+            <label class="slider-row"><span>Midpoint</span><input type="range" min="0.1" max="0.9" step="0.05" value="0.5" data-key="midpoint"><span class="val" data-val="midpoint">0.50</span></label>
+          </div>
+        </div>
+      </div>
+ 
+      <!-- SHARED SECTIONS -->
+      <div id="shared">
+
+        <div class="section">
+          <div class="sec-head">Dynamics</div>
+          <div class="sec-body">
+            <label class="check-row"><input type="checkbox" data-key="randRot"> Random rotation</label>
+            <label class="slider-row"><span>Rot min&deg;</span><input type="range" min="0" max="180" value="0" data-key="rotMin"><span class="val" data-val="rotMin">0</span><span class="suffix">&deg;</span></label>
+            <label class="slider-row"><span>Rot max&deg;</span><input type="range" min="0" max="360" value="360" data-key="rotMax"><span class="val" data-val="rotMax">360</span><span class="suffix">&deg;</span></label>
+            <label class="check-row"><input type="checkbox" data-key="randOpa"> Random opacity</label>
+            <label class="slider-row"><span>Opa min %</span><input type="range" min="0" max="100" value="40" data-key="opaMin"><span class="val" data-val="opaMin">40</span></label>
+            <label class="slider-row"><span>Opa max %</span><input type="range" min="0" max="100" value="100" data-key="opaMax"><span class="val" data-val="opaMax">100</span></label>
+            <label class="check-row"><input type="checkbox" data-key="flipH"> Random flip H</label>
+            <label class="check-row"><input type="checkbox" data-key="flipV"> Random flip V</label>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="sec-head">Color</div>
+          <div class="sec-body">
+            <div class="radio-grid" id="color-mode">
+              <label><input type="radio" name="color-mode" value="0" checked> Flat</label>
+              <label><input type="radio" name="color-mode" value="1"> Multi</label>
+              <label><input type="radio" name="color-mode" value="2"> Gradient</label>
+              <label><input type="radio" name="color-mode" value="3"> Image</label>
+            </div>
+
+            <div id="color-slots">
+              <div class="slot"><input type="checkbox" data-color="0" checked><input type="color" class="cpick" data-cidx="0" value="#000000"></div>
+              <div class="slot"><input type="checkbox" data-color="1"><input type="color" class="cpick" data-cidx="1" value="#FF6B35"></div>
+              <div class="slot"><input type="checkbox" data-color="2"><input type="color" class="cpick" data-cidx="2" value="#3399FF"></div>
+              <div class="slot"><input type="checkbox" data-color="3"><input type="color" class="cpick" data-cidx="3" value="#66FF66"></div>
+              <div class="slot"><input type="checkbox" data-color="4"><input type="color" class="cpick" data-cidx="4" value="#FF33CC"></div>
+            </div>
+
+            <div id="color-gradient" class="hidden">
+              <div class="slot-row"><span class="lbl">Stop 1</span><input type="color" class="cpick" data-gidx="0" value="#FF6B35"></div>
+              <div class="slot-row"><span class="lbl">Stop 2</span><input type="color" class="cpick" data-gidx="1" value="#1a1a1a"></div>
+              <label class="check-row"><input type="checkbox" data-key="grad3"> 3-stop</label>
+              <div class="slot-row" id="g3-row"><span class="lbl">Stop 3</span><input type="color" class="cpick" data-gidx="2" value="#FFFFFF"></div>
+              <label class="slider-row"><span class="lbl">Direction</span>
+                <select id="grad-dir">
+                  <option value="0">Horizontal L-R</option>
+                  <option value="1">Horizontal R-L</option>
+                  <option value="2">Vertical T-B</option>
+                  <option value="3">Vertical B-T</option>
+                  <option value="4">Diagonal</option>
+                  <option value="5">Radial outward</option>
+                </select>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="sec-head">Output</div>
+          <div class="sec-body">
+            <label class="check-row"><input type="checkbox" data-key="clipMask" checked> Clip mask</label>
+            <label class="check-row"><input type="checkbox" data-key="keepSrc"> Keep source shape</label>
+            <label class="check-row"><input type="checkbox" data-key="groupShapes" checked> Group shapes</label>
+            <label class="slider-row"><span class="lbl">Blend mode</span>
+              <select id="blend-mode" data-key="blend">
+                <option value="normal">Normal</option>
+                <option value="multiply">Multiply</option>
+                <option value="screen">Screen</option>
+                <option value="overlay">Overlay</option>
+                <option value="softLight">Soft Light</option>
+                <option value="hardLight">Hard Light</option>
+                <option value="darken">Darken</option>
+                <option value="lighten">Lighten</option>
+              </select>
+            </label>
+            <label class="slider-row"><span>Opacity</span><input type="range" min="1" max="100" value="100" data-key="opacity"><span class="val" data-val="opacity">100</span><span class="suffix">%</span></label>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- ACTION BAR -->
+    <footer id="action-bar">
+      <select id="preset-select"></select>
+      <button id="generate">Generate</button>
+    </footer>
+
+  </div>
+
+  <!-- RIGHT: PREVIEW -->
+  <div id="col-right">
+    <section id="preview-wrap">
+      <div id="preview-stage">
+        <canvas id="preview"></canvas>
+      </div>
+      <div id="preview-tools">
+        <div class="bg-toggle">
+          <button class="bg-btn active" data-bg="white" title="White background">W</button>
+          <button class="bg-btn" data-bg="black" title="Black background">B</button>
+          <button class="bg-btn" data-bg="checker" title="Checkerboard">▦</button>
+        </div>
+        <button id="preview-refresh" title="Refresh preview">↻</button>
+      </div>
+    </section>
+  </div>
+
+  <div id="toast"></div>
+</div>
+
+<script src="./js/CSInterface.js"></script>
+<script src="./js/halftone-math.js"></script>
+<script src="./js/preview.js"></script>
+<script src="./js/main.js"></script>
+</body>
+</html>
