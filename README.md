@@ -353,12 +353,6 @@ com.petradot.halftonepro/
 
   css/
     style.css           Dark theme matching Illustrator UI
-
-  images/               Preview screenshots and panel icon
-  docs/                 Design specs and implementation plans
-
-  install-windows.bat   Windows installer
-  install-mac.sh        macOS installer
 ```
 
 ### Data Flow
