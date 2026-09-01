@@ -203,7 +203,7 @@
   }
 
   function renderSpots(bounds) {
-    var cell = Math.max(2, cfg.cell);
+    var cell = Math.max(1, cfg.cell);
     var gap = cfg.gap / 100;
     var ang = cfg.angle * Math.PI / 180;
     var cos = Math.cos(ang), sin = Math.sin(ang);
@@ -243,7 +243,7 @@
         scBase /= 100;
         if (cfg.randSize) scBase *= 0.5 + Math.random();
         var r = half * scBase * gapScale;
-        if (r < 0.2) continue;
+        if (r < 0.05) continue;
         var col = getColor(wx, wy, bounds);
         ctx.fillStyle = col;
         ctx.strokeStyle = col;
@@ -441,6 +441,37 @@
         // Store scale for stroke-width compensation in draw helpers
         cfg._ps = vs;
         bounds = { L: L, T: T, R: R, B: B, W: W, H: H };
+
+        // Apply selection path clipping if available
+        if (db.selPaths && db.selPaths.length > 0) {
+          ctx.beginPath();
+          for (var sp = 0; sp < db.selPaths.length; sp++) {
+            var selPath = db.selPaths[sp];
+            if (!selPath.pts || selPath.pts.length < 2) continue;
+            // Convert from Y-up (Illustrator) to Y-down (canvas)
+            var fp = selPath.pts[0];
+            ctx.moveTo(fp.a[0], T + B - fp.a[1]);
+            for (var pi = 1; pi < selPath.pts.length; pi++) {
+              var cp = selPath.pts[pi];
+              var pp = selPath.pts[pi - 1];
+              ctx.bezierCurveTo(
+                pp.r[0], T + B - pp.r[1],
+                cp.l[0], T + B - cp.l[1],
+                cp.a[0], T + B - cp.a[1]
+              );
+            }
+            if (selPath.closed && selPath.pts.length > 2) {
+              var lp = selPath.pts[selPath.pts.length - 1];
+              ctx.bezierCurveTo(
+                lp.r[0], T + B - lp.r[1],
+                fp.l[0], T + B - fp.l[1],
+                fp.a[0], T + B - fp.a[1]
+              );
+              ctx.closePath();
+            }
+          }
+          ctx.clip();
+        }
       } else {
         cfg._ps = 0;
         bounds = { L: pad, T: pad, R: cw - pad, B: ch - pad, W: cw - pad * 2, H: ch - pad * 2 };

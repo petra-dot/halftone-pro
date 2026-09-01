@@ -11,7 +11,7 @@
   var DEFAULTS = {
     tab: 0,
     shape: "circle",
-    cell: 6, gap: 3, minScale: 5, maxScale: 100, angle: 45,
+    cell: 4, gap: 3, minScale: 5, maxScale: 100, angle: 45,
     randSize: false, scatter: 0, dotSource: "uniform", invert: false, gamma: 1.0, midpoint: 0.5,
     placeImage: false,
     lineMode: "straight", lineSpacing: 8, lineAngle: 45,
@@ -589,18 +589,21 @@
     btn.addEventListener("click", function () {
       btn.disabled = true;
       btn.textContent = "Generating…";
-      // Build config payload (NO grid data — sent separately)
-      var config = {};
-      for (var k in state) config[k] = state[k];
-      // Remove data-only keys — grids and image data go through separate evalScript calls
-      delete config.lumaGrid;
-      delete config.imgColorGrid;
-      delete config.imageGrids;
-      delete config.imgDataB64;
-      delete config.imgDataMime;
-      delete config.docBounds; // engine recomputes bounds from document
-      // Send raw config object — runEvalChain handles JSON.stringify + escaping
-      sendGridsThenGenerate(config, state.tab, state.dotSource, state.cMode);
+      // Refresh bounds first so preview and engine use current selection
+      refreshDocBounds(function () {
+        // Build config payload (NO grid data — sent separately)
+        var config = {};
+        for (var k in state) config[k] = state[k];
+        // Remove data-only keys — grids and image data go through separate evalScript calls
+        delete config.lumaGrid;
+        delete config.imgColorGrid;
+        delete config.imageGrids;
+        delete config.imgDataB64;
+        delete config.imgDataMime;
+        delete config.docBounds; // engine recomputes bounds from document
+        // Send raw config object — runEvalChain handles JSON.stringify + escaping
+        sendGridsThenGenerate(config, state.tab, state.dotSource, state.cMode);
+      });
     });
   }
 
@@ -642,7 +645,7 @@
       try {
         var obj = JSON.parse(res);
         if (obj.ok && obj.W > 0 && obj.H > 0) {
-          state.docBounds = { L: obj.L, T: obj.T, R: obj.R, B: obj.B, W: obj.W, H: obj.H, hasSelection: obj.hasSelection };
+          state.docBounds = { L: obj.L, T: obj.T, R: obj.R, B: obj.B, W: obj.W, H: obj.H, hasSelection: obj.hasSelection, selPaths: obj.selPaths || null };
         } else {
           state.docBounds = null;
         }
@@ -688,6 +691,10 @@
     HalftonePreview.setBg("white");
     // Fetch doc bounds asynchronously; preview will update once received
     refreshDocBounds();
+    // Refresh bounds when panel regains focus (user switched back from Illustrator)
+    window.addEventListener("focus", function () {
+      refreshDocBounds();
+    });
   }
 
   if (document.readyState === "loading") {

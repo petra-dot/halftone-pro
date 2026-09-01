@@ -467,7 +467,7 @@ function _runSpots(cfg) {
     }
   }
 
-  var cell = Math.max(2, cfg.cell);
+  var cell = Math.max(1, cfg.cell);
   var gap = (cfg.gap || 0) / 100;
   var angle = (cfg.angle || 0) * Math.PI / 180;
   var cos = Math.cos(angle), sin = Math.sin(angle);
@@ -522,7 +522,7 @@ function _runSpots(cfg) {
       var scBase = (cfg.minScale + (1 - luma) * (cfg.maxScale - cfg.minScale)) / 100;
       if (cfg.randSize) scBase *= _rand(0.5, 1.5);
       var r = half * scBase * gapScale;
-      if (r < 0.2) continue;
+      if (r < 0.05) continue;
       var item = _makeShape(doc, parent, shape, wx, wy, r);
       // fill color
       var c = _pickColor(cfg, wx, wy, bounds);
@@ -698,21 +698,36 @@ function _runLines(cfg) {
 }
 
 // ====================== CLIP MASK ======================
-function _applyClipMask(doc, result, cfg, bounds) {
+function _applyClipMask(doc, result, cfg, bounds, clipPaths) {
   if (!cfg.clipMask) return;
   try {
-    // Build rect path on the shape layer
-    var maskParent = result.newLayer.pathItems;
-    var rect = maskParent.rectangle(bounds.T, bounds.L, bounds.W, bounds.H);
-    rect.filled = false;
-    rect.stroked = false;
-
-    // If there was a source selection and keepSrc + clip via selection shape requested,
-    // we still just use the bounding rect for simplicity here.
-    // Move rect to top of new layer to act as clip
-    rect.move(result.newLayer, ElementPlacement.PLACEBEFORE);
-    rect.makeMask(true);
-    // remove the rect position dependency
+    var maskParent = result.group || result.newLayer;
+    if (clipPaths && clipPaths.length > 0) {
+      // Move clip paths to FRONT (PLACEATBEGINNING) of the group —
+      // Illustrator requires the mask path to be the first (topmost) item.
+      for (var i = 0; i < clipPaths.length; i++) {
+        clipPaths[i].filled = false;
+        clipPaths[i].stroked = false;
+        clipPaths[i].move(maskParent, ElementPlacement.PLACEATBEGINNING);
+        clipPaths[i].clipping = true;
+      }
+      // Mark the group as clipped — this activates the clipping mask
+      if (maskParent.typename === "GroupItem") {
+        maskParent.clipped = true;
+      }
+    } else {
+      // Fallback: rectangular clip from bounds
+      var rect = maskParent.pathItems.rectangle(
+        bounds.T, bounds.L, bounds.W, bounds.H
+      );
+      rect.filled = false;
+      rect.stroked = false;
+      rect.move(maskParent, ElementPlacement.PLACEATBEGINNING);
+      rect.clipping = true;
+      if (maskParent.typename === "GroupItem") {
+        maskParent.clipped = true;
+      }
+    }
   } catch (e) { _log("clipMask failed: " + e.message); }
 }
 
@@ -833,15 +848,41 @@ function generate(jsonStr) {
       if (!result) result = _runSpots(cfg);
     }
 
-    // Optionally remove source if !keepSrc and there was a selection
-    if (refSel && !cfg.keepSrc) {
+    // Build clip mask paths from selection before removal
+    var clipPaths = null;
+    if (refSel && refSel.length > 0) {
+      clipPaths = [];
       for (var i = 0; i < refSel.length; i++) {
-        try { refSel[i].remove(); } catch (e) {}
+        try {
+          var src = refSel[i];
+          if (src.typename === "PathItem" && src.pathPoints && src.pathPoints.length > 0) {
+            // Create fresh path from selection's points (more reliable for masking than duplicate)
+            var maskParent = result.group || result.newLayer;
+            var pi = maskParent.pathItems.add();
+            pi.filled = false;
+            pi.stroked = false;
+            for (var p = 0; p < src.pathPoints.length; p++) {
+              var sp = src.pathPoints[p];
+              var pt = pi.pathPoints.add();
+              pt.anchor = sp.anchor;
+              pt.leftDirection = sp.leftDirection;
+              pt.rightDirection = sp.rightDirection;
+              pt.pointType = sp.pointType;
+            }
+            pi.closed = src.closed;
+            clipPaths.push(pi);
+          }
+        } catch (e) {}
+      }
+      if (!cfg.keepSrc) {
+        for (var i = 0; i < refSel.length; i++) {
+          try { refSel[i].remove(); } catch (e) {}
+        }
       }
     }
 
-    // Clip mask
-    if (cfg.clipMask) _applyClipMask(doc, result, cfg, result.bounds);
+    // Clip mask — only when user selected a path to clip to
+    if (cfg.clipMask && clipPaths.length > 0) _applyClipMask(doc, result, cfg, result.bounds, clipPaths);
 
     // Place source image on artboard (image tab)
     if (cfg.placeImage && G_PLACE_IMAGE && tab === 3) {
@@ -991,12 +1032,30 @@ function getDocBounds() {
     if (!doc) return _stringify({ ok: false, msg: "No open document" });
     var sel = (app.selection && app.selection.length) ? app.selection : null;
     var bounds = _getBounds(doc, sel);
-    return _stringify({
+    var result = {
       ok: true,
       L: bounds.L, T: bounds.T, R: bounds.R, B: bounds.B,
       W: bounds.W, H: bounds.H,
       hasSelection: bounds.hasSelection
-    });
+    };
+    // Return selection path data for preview clipping
+    if (sel && sel.length > 0) {
+      var paths = [];
+      for (var i = 0; i < sel.length; i++) {
+        try {
+          if (sel[i].typename === "PathItem" && sel[i].pathPoints && sel[i].pathPoints.length > 0) {
+            var pts = [];
+            for (var p = 0; p < sel[i].pathPoints.length; p++) {
+              var sp = sel[i].pathPoints[p];
+              pts.push({ a: sp.anchor, l: sp.leftDirection, r: sp.rightDirection });
+            }
+            paths.push({ pts: pts, closed: sel[i].closed });
+          }
+        } catch (e) {}
+      }
+      if (paths.length > 0) result.selPaths = paths;
+    }
+    return _stringify(result);
   } catch (e) {
     return _stringify({ ok: false, msg: "Error: " + e.message });
   }
