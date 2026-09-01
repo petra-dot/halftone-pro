@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ExtensionManifest Version="11.0" ExtensionBundleId="com.petradot.halftonepro"
-    ExtensionBundleVersion="4.0.0" ExtensionBundleName="Halftone Pro"
+    ExtensionBundleVersion="4.0.2" ExtensionBundleName="Halftone Pro"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <ExtensionList>
         <Extension Id="com.petradot.halftonepro" Version="4.0.0" />
